@@ -26,6 +26,6 @@ This project applies lessons learned from implementing prompt engineering framew
 
 ## Contact
 
-Built by Eduard Brown - Program Manager with 6+ years implementing AI/ML solutions at Amazon and Microsoft.
+Built by e3brown
 
 [LinkedIn](https://linkedin.com/in/eddy-brown) | [Email](mailto:e3brown@outlook.com)
