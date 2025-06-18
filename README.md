@@ -1,10 +1,11 @@
 # SynthScribe - AI-Powered Music Recommendation Engine
 
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![AI Models](https://img.shields.io/badge/AI-OpenAI%20%7C%20Anthropic%20%7C%20Local-orange.svg)](README.md)
+[![CI/CD Pipeline](https://github.com/e3brown-rba/synthscribe/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/e3brown-rba/synthscribe/actions/workflows/ci.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![CI/CD Pipeline](https://github.com/e3brown-rba/synthscribe/actions/workflows/ci.yml/badge.svg)](https://github.com/e3brown-rba/synthscribe/actions/workflows/ci.yml)
+[![Type checking: mypy](https://img.shields.io/badge/type_checking-mypy-blue.svg)](https://mypy-lang.org/)
+[![AI Models](https://img.shields.io/badge/AI-OpenAI%20%7C%20Anthropic%20%7C%20Local-orange.svg)](README.md)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## 🎯 Project Overview
 
