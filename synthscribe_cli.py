@@ -211,7 +211,7 @@ def parse_llm_suggestions(raw_suggestions: str) -> List[MusicSuggestion]:
 
 def analyze_user_history(user_profile: UserProfile) -> str:
     """Extract context from user history for persona-based prompts"""
-    favorite_genres = {}
+    favorite_genres: Dict[str, int] = {}
     for entry in user_profile.preferences.get("history", [])[:5]:  # Last 5 entries
         for suggestion in entry.get("suggestions", []):
             genre = suggestion.get("genre", "")
@@ -322,9 +322,9 @@ def get_music_suggestions(
 
         # Use variant-specific prompt if available
         if variant_name and variant_name in PROMPT_VARIANTS:
-            prompt_template = PROMPT_VARIANTS[variant_name]["config"][
-                "template"
-            ].format(
+            variant_data = PROMPT_VARIANTS[variant_name]
+            template_str = str(variant_data["config"]["template"])  # type: ignore
+            prompt_template = template_str.format(
                 description=description,
                 context=(
                     analyze_user_history(user_profile)

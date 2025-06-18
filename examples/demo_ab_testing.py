@@ -16,6 +16,7 @@ from config import Config, LLMProvider
 from logger import get_logger
 import random
 import time
+from typing import List
 
 
 def simulate_user_session(ab_manager: ABTestingManager, user_id: str, mood: str):
@@ -52,7 +53,10 @@ def simulate_user_session(ab_manager: ABTestingManager, user_id: str, mood: str)
 
     # Simulate user interaction
     # Higher quality = more likely to interact
-    avg_quality = sum(r["quality"] for r in recommendations) / len(recommendations)
+    qualities: List[float] = []
+    for r in recommendations:
+        qualities.append(float(r["quality"]))  # type: ignore
+    avg_quality: float = sum(qualities) / len(qualities)
     interaction_probability = avg_quality / 5.0  # Convert to 0-1 probability
 
     # Add variant-specific bias (simulating that some prompts perform better)

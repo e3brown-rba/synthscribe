@@ -240,7 +240,7 @@ class ABTestingManager:
 
         is_significant, winner, p_value = experiment.is_significant()
 
-        results = {
+        results: Dict[str, Any] = {
             "name": experiment.name,
             "status": experiment.status.value,
             "created_at": experiment.created_at.isoformat(),
@@ -414,7 +414,7 @@ if __name__ == "__main__":
         print(f"{user_id} -> {variant}")
 
         # Simulate success (simplified - in reality based on user action)
-        if random.random() > 0.4:  # 60% success rate
+        if variant is not None and random.random() > 0.4:  # 60% success rate
             ab_manager.record_success("prompt_optimization_v1", variant)
 
             # Simulate feedback
