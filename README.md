@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![AI Models](https://img.shields.io/badge/AI-OpenAI%20%7C%20Anthropic%20%7C%20Local-orange.svg)](README.md)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![CI/CD Pipeline](https://github.com/YOUR_USERNAME/synthscribe/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/synthscribe/actions/workflows/ci.yml)
+[![CI/CD Pipeline](https://github.com/e3brown-rba/synthscribe/actions/workflows/ci.yml/badge.svg)](https://github.com/e3brown-rba/synthscribe/actions/workflows/ci.yml)
 
 ## 🎯 Project Overview
 
