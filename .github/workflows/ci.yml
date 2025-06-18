@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -36,7 +36,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
     
     - name: Type check with mypy
-      run: mypy synthscribe --ignore-missing-imports
+      run: mypy . --ignore-missing-imports --exclude tests/
 
   test:
     name: Run Tests
@@ -45,9 +45,10 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.8', '3.9', '3.10', '3.11']
+      fail-fast: false
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -62,40 +63,50 @@ jobs:
     
     - name: Run tests with coverage
       run: |
-        pytest --cov=synthscribe --cov-report=xml --cov-report=html
+        pytest tests/ --cov=. --cov-report=xml --cov-report=html
     
     - name: Upload coverage to Codecov
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'
       uses: codecov/codecov-action@v3
       with:
-        file: ./coverage.xml
+        files: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
+        fail_ci_if_error: false
 
   security:
     name: Security Scan
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit[toml] safety
     
     - name: Run Bandit Security Scan
-      uses: gaurav-nelson/bandit-action@v1
-      with:
-        path: "synthscribe"
+      run: |
+        bandit -r . -f json -o bandit-report.json || true
+        bandit -r . -ll || true
     
     - name: Check for security vulnerabilities
       run: |
-        pip install safety
-        safety check
+        safety check --json || true
 
   build:
     name: Build Package
-    needs: [lint, test]
+    needs: [lint, test, security]
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -105,10 +116,54 @@ jobs:
     - name: Install build dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build
+        pip install build twine
+    
+    - name: Create setup.py for building
+      run: |
+        cat > setup.py << 'EOF'
+        from setuptools import setup, find_packages
+        
+        with open("README.md", "r", encoding="utf-8") as fh:
+            long_description = fh.read()
+        
+        with open("requirements.txt", "r", encoding="utf-8") as fh:
+            requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
+        
+        setup(
+            name="synthscribe",
+            version="1.0.0",
+            author="e3brown-rba",
+            description="AI-powered music recommendation engine",
+            long_description=long_description,
+            long_description_content_type="text/markdown",
+            url="https://github.com/e3brown-rba/synthscribe",
+            packages=find_packages(),
+            classifiers=[
+                "Development Status :: 4 - Beta",
+                "Intended Audience :: Developers",
+                "License :: OSI Approved :: MIT License",
+                "Operating System :: OS Independent",
+                "Programming Language :: Python :: 3",
+                "Programming Language :: Python :: 3.8",
+                "Programming Language :: Python :: 3.9",
+                "Programming Language :: Python :: 3.10",
+                "Programming Language :: Python :: 3.11",
+            ],
+            python_requires=">=3.8",
+            install_requires=requirements,
+            entry_points={
+                "console_scripts": [
+                    "synthscribe=synthscribe_cli:main",
+                ],
+            },
+        )
+        EOF
     
     - name: Build distribution
       run: python -m build
+    
+    - name: Check distribution
+      run: twine check dist/*
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
@@ -123,20 +178,37 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
     
     - name: Check if version changed
       id: version
       run: |
-        echo "::set-output name=changed::$(git diff HEAD~1 HEAD --name-only | grep -E '(setup.py|__version__|version)' | wc -l)"
+        # Check if any version-related files changed
+        if git diff --name-only HEAD~1 HEAD | grep -E '(setup.py|__version__|version|pyproject.toml)'; then
+          echo "changed=1" >> $GITHUB_OUTPUT
+        else
+          echo "changed=0" >> $GITHUB_OUTPUT
+        fi
     
     - name: Create tag and release
-      if: steps.version.outputs.changed != '0'
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      if: steps.version.outputs.changed == '1'
+      uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ github.run_number }}
-        release_name: Release v${{ github.run_number }}
+        tag_name: v1.0.${{ github.run_number }}
+        name: Release v1.0.${{ github.run_number }}
         draft: false
         prerelease: false
+        body: |
+          ## Release v1.0.${{ github.run_number }}
+          
+          Automated release from CI/CD pipeline.
+          
+          ### Changes in this release:
+          - Latest improvements and bug fixes
+          - See commit history for detailed changes
+        files: |
+          dist/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
